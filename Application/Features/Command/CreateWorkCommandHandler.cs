@@ -1,0 +1,31 @@
+﻿using ClientManagement.Application.Interfaces;
+using ClientManagement.Domain.Entity;
+using ClientManagement.Infrastructure.Persistence.PostgresDB;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+
+namespace ClientManagement.Application.Features.Command
+{
+    public class CreateWorkCommandHandler(ClientManagementDbContext dbContext, ICurrentUserService currentUserService) : IRequestHandler<CreateWorkCommand, string>
+    {
+        public async Task<string> Handle(CreateWorkCommand request, CancellationToken cancellationToken)
+        {
+            // to do code
+            bool isExist = await dbContext.Users.AnyAsync(x => x.Id == currentUserService.clientId);
+            if (!isExist) return "client doesn't exist";
+
+            Work newWork = new Work
+            {
+                ClientId = request.clientId,
+                ProjectName = request.projName,
+                //ProjDescription = request.description,
+                Cost = 0
+            };
+
+            await dbContext.Works.AddAsync(newWork);
+            int result = await dbContext.SaveChangesAsync();
+
+            return (result < 1) ? "work not added" : "work added";
+        }
+    }
+}
