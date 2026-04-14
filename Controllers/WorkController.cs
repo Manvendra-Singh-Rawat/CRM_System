@@ -1,5 +1,9 @@
-﻿using ClientManagement.Application.Features.Command;
+﻿using ClientManagement.Application.DTO;
+using ClientManagement.Application.Features.Command;
+using ClientManagement.Application.Features.Query;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ClientManagement.Controllers
@@ -8,23 +12,31 @@ namespace ClientManagement.Controllers
     [Route("[controller]")]
     public class WorkController(ISender _sender) : Controller
     {
+        [Authorize]
         [HttpPost("creatework")]
-        public Task CreateWork(CreateWorkCommand work)
+        public async Task<ActionResult<string>> CreateWork(CreateWorkCommand work)
         {
-            _sender.Send(work);
-            return Task.CompletedTask;
+            string result = await _sender.Send(work);
+            return Created();
         }
 
-        /*[HttpDelete]
-        public Task DeleteWork(Work work)
+        [Authorize(Roles = "Admin")]
+        [HttpPatch("update-details")]
+        public async Task<ActionResult> UpdateWorkDetails(UpdateWorkDetailsCommand work)
         {
-            return Task.CompletedTask;
+            var result = await _sender.Send(work);
+            return Ok(result);
         }
 
-        [HttpPost]
-        public Task UpdateWork(Work work)
+        [Authorize]
+        [HttpGet("get-your-work")]
+        public async Task<ActionResult<List<GetWorkDTO>>> GetWorkDetails()
         {
-            return Task.CompletedTask;
-        }*/
+            var result = await _sender.Send(new GetWorkQuery());
+            if (result == null)
+                return NotFound("No work by you");
+
+            return Ok(result);
+        }
     }
 }

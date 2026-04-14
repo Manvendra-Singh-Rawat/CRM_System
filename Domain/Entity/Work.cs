@@ -6,13 +6,11 @@ namespace ClientManagement.Domain.Entity
     public class Work
     {
         public int Id { get; set; }
-        public string ProjectName { get; set; } = string.Empty;
+        public required string ProjectName { get; set; }
+        public string ProjectDesc { get; set; } = string.Empty;
 
-        // Later add project description data
-        //public string ProjectDesc { get; set; } = string.Empty;
-
-        public int ClientId { get; set; }
-        public int Cost { get; set; }
+        public required int ClientId { get; set; }
+        public double Cost { get; set; } = 0;
         public bool IsCompleted { get; set; } = false;
         public bool IsPaid { get; set; } = false;
 

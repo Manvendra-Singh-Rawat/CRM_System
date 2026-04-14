@@ -2,6 +2,7 @@
 using ClientManagement.Infrastructure.Persistence.PostgresDB;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -10,9 +11,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ClientManagement.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ClientManagementDbContext))]
-    partial class ClientManagementDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260409092744_V0.48.5_MigrationWork")]
+    partial class V0485_MigrationWork
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

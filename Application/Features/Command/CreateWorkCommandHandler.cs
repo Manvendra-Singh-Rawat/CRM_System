@@ -14,11 +14,16 @@ namespace ClientManagement.Application.Features.Command
             bool isExist = await dbContext.Users.AnyAsync(x => x.Id == currentUserService.clientId);
             if (!isExist) return "client doesn't exist";
 
+            UserDetail? userDetail = await dbContext.UserDetails.Where(x => x.Id == currentUserService.clientId).FirstOrDefaultAsync(cancellationToken);
+            if (userDetail == null) return "internal server error";
+            if (userDetail.Name == "" || userDetail.Phone == "" || userDetail.Company == "")
+                return "Please update your details first.";
+
             Work newWork = new Work
             {
-                ClientId = request.clientId,
+                ClientId = currentUserService.clientId,
                 ProjectName = request.projName,
-                //ProjDescription = request.description,
+                ProjectDesc = request.description,
                 Cost = 0
             };
 

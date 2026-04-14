@@ -1,4 +1,5 @@
-﻿using ClientManagement.Application.DTO;
+﻿using ClientManagement.Application.DataTemplate;
+using ClientManagement.Application.DTO;
 using ClientManagement.Application.Features.Command;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -14,10 +15,14 @@ namespace ClientManagement.Controllers
         public UserController(ISender sender) => _sender = sender;
 
         [HttpPost("register")]
-        public async Task<ActionResult<int>> RegisterUser(RegisterUserCommand user)
+        public async Task<ActionResult<ApiResponse<int>>> RegisterUser(RegisterUserCommand user)
         {
-            int result = await _sender.Send(user);
-            return (result < 0) ? StatusCode(500) : (result == 0) ? BadRequest() : Created("/user", result);
+            var result = await _sender.Send(user);
+
+            if(result.IsSuccess)
+                return Created("/user", ApiResponse<int>.SuccessResponse(result.Data, result.Message));
+            else
+                return ApiResponse<int>.FailureResponse(result.Message);
         }
 
         [HttpPost("login")]
