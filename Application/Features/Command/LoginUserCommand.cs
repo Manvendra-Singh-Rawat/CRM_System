@@ -1,10 +1,10 @@
-﻿using ClientManagement.Application.DTO;
+﻿using ClientManagement.Application.DataTemplate;
 using MediatR;
 using System.ComponentModel.DataAnnotations;
 
 namespace ClientManagement.Application.Features.Command
 {
-    public class LoginUserCommand : IRequest<UserLoginDTO>
+    public class LoginUserCommand : IRequest<Result<string>>
     {
         [Required]
         [MinLength(10)]

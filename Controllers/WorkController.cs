@@ -1,9 +1,9 @@
-﻿using ClientManagement.Application.DTO;
+﻿using ClientManagement.Application.DataTemplate;
+using ClientManagement.Application.DTO;
 using ClientManagement.Application.Features.Command;
 using ClientManagement.Application.Features.Query;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ClientManagement.Controllers
@@ -14,29 +14,36 @@ namespace ClientManagement.Controllers
     {
         [Authorize]
         [HttpPost("creatework")]
-        public async Task<ActionResult<string>> CreateWork(CreateWorkCommand work)
+        public async Task<ActionResult<ApiResponse<int>>> CreateWork(CreateWorkCommand work)
         {
-            string result = await _sender.Send(work);
-            return Created();
+            Result<int> result = await _sender.Send(work);
+            if (result.IsSuccess)
+                return Created("/work", ApiResponse<int>.SuccessResponse(result.Data, result.Message));
+            else
+                return ApiResponse<int>.FailureResponse(result.Message);
         }
 
         [Authorize(Roles = "Admin")]
         [HttpPatch("update-details")]
-        public async Task<ActionResult> UpdateWorkDetails(UpdateWorkDetailsCommand work)
+        public async Task<ActionResult<ApiResponse<string>>> UpdateWorkDetails(UpdateWorkDetailsCommand work)
         {
-            var result = await _sender.Send(work);
-            return Ok(result);
+            Result<string> result = await _sender.Send(work);
+            if(result.IsSuccess)
+                return Ok(ApiResponse<string>.SuccessResponse(result.Data, result.Message));
+            else
+                return ApiResponse<string>.FailureResponse(result.Message);
         }
 
         [Authorize]
         [HttpGet("get-your-work")]
-        public async Task<ActionResult<List<GetWorkDTO>>> GetWorkDetails()
+        public async Task<ActionResult<ApiResponse<List<GetWorkDTO>>>> GetWorkDetails()
         {
-            var result = await _sender.Send(new GetWorkQuery());
-            if (result == null)
-                return NotFound("No work by you");
+            Result<List<GetWorkDTO>> result = await _sender.Send(new GetWorkQuery());
 
-            return Ok(result);
+            if (result.IsSuccess)
+                return Ok(ApiResponse<List<GetWorkDTO>>.SuccessResponse(result.Data, result.Message));
+            else
+                return ApiResponse<List<GetWorkDTO>>.FailureResponse(result.Message);
         }
     }
 }

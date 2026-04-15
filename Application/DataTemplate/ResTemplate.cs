@@ -1,24 +1,29 @@
-﻿namespace ClientManagement.Application.DataTemplate
+﻿using System.Reflection.Metadata.Ecma335;
+
+namespace ClientManagement.Application.DataTemplate
 {
     public class Result<T>
     {
         public bool IsSuccess {  get; set; }
         public string Message { get; set; } = string.Empty;
         public T? Data { get; set; }
+        public Int16 StatusCode { get; set; } = 500;
 
-        public static Result<T> Success(T retrievedData, string retrievedMessage = "")
+        public static Result<T> Success(T retrievedData, string retrievedMessage = "", Int16 statusCode = 500)
             => new()
             {
                 IsSuccess = true,
                 Data = retrievedData,
-                Message = retrievedMessage
+                Message = retrievedMessage,
+                StatusCode = statusCode
             };
 
-        public static Result<T> Failure(string errorMessage)
+        public static Result<T> Failure(string errorMessage, Int16 statusCode = 500)
             => new()
             {
                 IsSuccess = false,
-                Message = errorMessage
+                Message = errorMessage,
+                StatusCode = statusCode
             };
     }
 

@@ -6,6 +6,6 @@ namespace ClientManagement.Application.Interfaces
     public interface IAuthService
     {
         Task<User?> RegisterAsync(UserRegisterDTO client);
-        Task<string?> LoginAsync(UserLoginDTO client);
+        Task<string?> LoginAsync();
     }
 }

@@ -1,5 +1,4 @@
 ﻿using ClientManagement.Application.DataTemplate;
-using ClientManagement.Application.DTO;
 using ClientManagement.Application.Features.Command;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -17,44 +16,48 @@ namespace ClientManagement.Controllers
         [HttpPost("register")]
         public async Task<ActionResult<ApiResponse<int>>> RegisterUser(RegisterUserCommand user)
         {
-            var result = await _sender.Send(user);
-
-            if(result.IsSuccess)
-                return Created("/user", ApiResponse<int>.SuccessResponse(result.Data, result.Message));
+            Result<int> registerStatus = await _sender.Send(user);
+            if (registerStatus.IsSuccess)
+                return Created("/user", ApiResponse<int>.SuccessResponse(registerStatus.Data, registerStatus.Message));
             else
-                return ApiResponse<int>.FailureResponse(result.Message);
+                return ApiResponse<int>.FailureResponse(registerStatus.Message);
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult> LoginUser(LoginUserCommand request)
+        public async Task<ActionResult<ApiResponse<string>>> LoginUser(LoginUserCommand loginRequest)
         {
-            UserLoginDTO loginStatus = await _sender.Send(request);
+            Result<string> loginStatus = await _sender.Send(loginRequest);
 
-            if(!string.Equals(loginStatus.issue, "")) return BadRequest(loginStatus.issue);
-
-            return Ok(loginStatus.token);
+            if (loginStatus.IsSuccess)
+                return Created("/user", ApiResponse<string>.SuccessResponse(loginStatus.Data, loginStatus.Message));
+            else
+                return ApiResponse<string>.FailureResponse(loginStatus.Message);
         }
 
         [Authorize]
         [HttpPatch("updatedetails")]
-        public async Task<ActionResult> UpdateDetails(UpdateUserCommand request)
+        public async Task<ActionResult<ApiResponse<string>>> UpdateDetails(UpdateUserCommand updateUserRequest)
         {
-            var result = await _sender.Send(request);
-            return Ok(result);
+            Result<string> result = await _sender.Send(updateUserRequest);
+
+            if (result.IsSuccess)
+                return Ok(ApiResponse<string>.SuccessResponse(result.Data, result.Message));
+            else
+                return StatusCode(result.StatusCode, ApiResponse<string>.FailureResponse(result.Message));
         }
 
         [Authorize]
         [HttpGet("checkauth")]
         public IActionResult AuthenticatedOnlyEndPoint()
         {
-            return Ok("You are authenticated! YAY!!!");
+            return Ok("You are authenticated!");
         }
 
         [Authorize(Roles = "Admin")]
         [HttpGet("admin-only")]
         public IActionResult AdminOnlyEndPoint()
         {
-            return Ok("You are authorized! DAMN BOI GOT SUM STATUS!!");
+            return Ok("You are authorized!");
         }
     }
 }

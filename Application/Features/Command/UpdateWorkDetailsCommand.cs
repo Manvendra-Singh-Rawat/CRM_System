@@ -1,9 +1,10 @@
-﻿using MediatR;
+﻿using ClientManagement.Application.DataTemplate;
+using MediatR;
 using System.ComponentModel.DataAnnotations;
 
 namespace ClientManagement.Application.Features.Command
 {
-    public class UpdateWorkDetailsCommand : IRequest<string>
+    public class UpdateWorkDetailsCommand : IRequest<Result<string>>
     {
         [Required]
         [MinLength(1)]

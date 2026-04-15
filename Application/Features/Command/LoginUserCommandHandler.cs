@@ -1,4 +1,4 @@
-﻿using ClientManagement.Application.DTO;
+﻿using ClientManagement.Application.DataTemplate;
 using ClientManagement.Domain.Entity;
 using ClientManagement.Infrastructure.Persistence.PostgresDB;
 using MediatR;
@@ -11,25 +11,18 @@ using System.Text;
 
 namespace ClientManagement.Application.Features.Command
 {
-    public class LoginUserCommandHandler(ClientManagementDbContext dbContext, IConfiguration config) : IRequestHandler<LoginUserCommand, UserLoginDTO>
+    public class LoginUserCommandHandler(ClientManagementDbContext dbContext, IConfiguration config) : IRequestHandler<LoginUserCommand, Result<string>>
     {
-        public async Task<UserLoginDTO> Handle(LoginUserCommand request, CancellationToken cancellationToken)
+        public async Task<Result<string>> Handle(LoginUserCommand request, CancellationToken cancellationToken)
         {
-            UserLoginDTO loginStatus = new UserLoginDTO();
-
-            var client = await dbContext.Users.Where(y => y.IsActive == true).FirstOrDefaultAsync(x => x.Email == request.Email, cancellationToken);
+            var client = await dbContext.Users.AsNoTracking().Where(y => y.IsActive == true).FirstOrDefaultAsync(x => x.Email == request.Email, cancellationToken);
             if(client == null)
-            {
-                loginStatus.issue = "account doesn't exist or is deactivated";
-                return loginStatus;
-            }
+                return Result<string>.Failure("Account does not exist or deactivated");
 
             if (new PasswordHasher<User>().VerifyHashedPassword(client, client.PasswordHash, request.Password) == PasswordVerificationResult.Success)
-                loginStatus.token = CreateToken(client);
+                return Result<string>.Success(CreateToken(client), "Login successful");
             else
-                loginStatus.issue = "incorrect email or password";
-
-            return loginStatus;
+                return Result<string>.Failure("Incorrect email or password");
         }
 
         private string CreateToken(User client)

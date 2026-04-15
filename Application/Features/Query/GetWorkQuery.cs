@@ -1,9 +1,10 @@
-﻿using ClientManagement.Application.DTO;
+﻿using ClientManagement.Application.DataTemplate;
+using ClientManagement.Application.DTO;
 using MediatR;
 
 namespace ClientManagement.Application.Features.Query
 {
-    public class GetWorkQuery : IRequest<List<GetWorkDTO>>
+    public class GetWorkQuery : IRequest<Result<List<GetWorkDTO>>>
     {
     }
 }

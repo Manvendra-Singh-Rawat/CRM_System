@@ -6,7 +6,7 @@ namespace ClientManagement.Application.Service
 {
     public class AuthService : IAuthService
     {
-        public Task<string?> LoginAsync(UserLoginDTO client)
+        public Task<string?> LoginAsync()
         {
             throw new NotImplementedException();
         }

@@ -1,4 +1,5 @@
-﻿using ClientManagement.Application.DTO;
+﻿using ClientManagement.Application.DataTemplate;
+using ClientManagement.Application.DTO;
 using ClientManagement.Application.Interfaces;
 using ClientManagement.Infrastructure.Persistence.PostgresDB;
 using MediatR;
@@ -7,9 +8,9 @@ using Microsoft.EntityFrameworkCore;
 namespace ClientManagement.Application.Features.Query
 {
     public class GetWorkQueryHandler(ClientManagementDbContext dbContext, ICurrentUserService currentUserService)
-        : IRequestHandler<GetWorkQuery, List<GetWorkDTO>>
+        : IRequestHandler<GetWorkQuery, Result<List<GetWorkDTO>>>
     {
-        public async Task<List<GetWorkDTO>> Handle(GetWorkQuery request, CancellationToken cancellationToken)
+        public async Task<Result<List<GetWorkDTO>>> Handle(GetWorkQuery request, CancellationToken cancellationToken)
         {
             var retrievedWork = await dbContext.Works
             .Where(w =>
@@ -28,7 +29,10 @@ namespace ClientManagement.Application.Features.Query
             })
             .ToListAsync(cancellationToken);
 
-            return retrievedWork;
+            if (retrievedWork != null)
+                return Result<List<GetWorkDTO>>.Success(retrievedWork, "Work list", 200);
+            else
+                return Result<List<GetWorkDTO>>.Failure("No work to display", 204);
         }
     }
 }

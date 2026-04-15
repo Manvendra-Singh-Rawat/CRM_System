@@ -13,7 +13,7 @@ namespace ClientManagement.Application.Features.Command
         {
             bool isUserExists = await dbContext.Users.AnyAsync(x => x.Email == request.Email, cancellationToken);
             if (isUserExists)
-                return Result<int>.Failure("Email already exists");
+                return Result<int>.Failure("Email already exists", 209);
 
             var hasher = new PasswordHasher<User>();
 
@@ -27,7 +27,7 @@ namespace ClientManagement.Application.Features.Command
 
             await dbContext.SaveChangesAsync();
 
-            return Result<int>.Success(newUser.Id, "User created successfully");
+            return Result<int>.Success(newUser.Id, "User created successfully", 201);
         }
     }
 }
