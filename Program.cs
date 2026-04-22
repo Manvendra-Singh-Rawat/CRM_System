@@ -1,3 +1,4 @@
+using ClientManagement.Application.DTO;
 using ClientManagement.Application.Interfaces;
 using ClientManagement.Application.Service;
 using ClientManagement.Infrastructure.Persistence.PostgresDB;
@@ -22,6 +23,20 @@ QuestPDF.Settings.License = LicenseType.Community;
 builder.Services.AddScoped<IInvoiceService, InvoiceService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+
+IInvoiceService invoiceService = new InvoiceService();
+var invoiceData = new CreateInvoiceDTO
+{
+    InvoiceId = 292,
+    ClientId = 19,
+    WorkId = 8,
+    ClientName = "Test Client",
+    ClientPhone = "8503940395",
+    ClientEmail = "test@gmail.com",
+    ProjectName = "Test",
+    ProjectCost = 500.00
+};
+invoiceService.CreateInvoice(invoiceData);
 
 builder.Services.AddMediatR(config =>
 {

@@ -1,7 +1,9 @@
-﻿namespace ClientManagement.Application.Interfaces
+﻿using ClientManagement.Application.DTO;
+
+namespace ClientManagement.Application.Interfaces
 {
     public interface IInvoiceService
     {
-        Task CreateInvoice();
+        Task CreateInvoice(CreateInvoiceDTO invoiceData);
     }
 }

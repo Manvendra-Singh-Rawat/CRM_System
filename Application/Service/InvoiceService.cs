@@ -1,59 +1,96 @@
-﻿using ClientManagement.Application.Interfaces;
+﻿using ClientManagement.Application.DTO;
+using ClientManagement.Application.Interfaces;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
-using System.Reflection;
 
 namespace ClientManagement.Application.Service
 {
     public class InvoiceService : IInvoiceService
     {
-        public Task CreateInvoice()
+        private CreateInvoiceDTO invoiceData = new CreateInvoiceDTO();
+        private readonly List<string> tensDigit = [ "Ten", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety" ];
+        private readonly List<string> teensDigit = ["Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
+        private readonly List<string> onceDigit = ["One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"];
+        public Task CreateInvoice(CreateInvoiceDTO invoiceData)
         {
+            this.invoiceData = invoiceData;
+
             Document.Create(container =>
             {
                 container.Page(page =>
                 {
-                    page.Margin(20);
+                    page.MarginVertical(40);
+                    page.MarginHorizontal(40);
 
-                    page.Header().Height(100).Background(Colors.Blue.Lighten4).Element(ComposerHeader);
-                    page.Content().Background(Colors.Red.Lighten4).Element(ComposeContent);
-                    page.Footer().Height(40).Background(Colors.Grey.Lighten1).Element(ComposeFooter);
+                    page.Header().Height(240)
+                    .Element(ComposerHeader);
+
+                    page.Content()
+                    .Element(ComposeContent);
+
+                    page.Footer().Height(40)
+                    .Element(ComposeFooter);
                 });
-            }).GeneratePdfAndShow();
-
+            }).GeneratePdf("test path");
             return Task.CompletedTask;
         }
 
+        // HEADER
         void ComposerHeader(IContainer container)
         {
-            container.Row(row =>
+            container.Column(col =>
             {
-                row.RelativeItem().Column(column =>
+                col.Item().Row(row =>
                 {
-                    column.Item()
-                    .Text("Invoice #3823492").FontSize(20).SemiBold().FontColor(Colors.Blue.Medium);
-
-                    column.Item().Text(text =>
+                    row.RelativeItem().Column(column =>
                     {
-                        text.Span("Issue date: ").SemiBold();
-                        text.Span("19.03.2026");
+                        column.Item().Text("DEVIL HUNTER TECH").FontSize(20).FontFamily("GENISO");
+
+                        column.Item().Text("200X, Near Anor Londo Church,\nRed Grave City\n").FontSize(12);
+
+                        column.Item().Text($"Invoice #{invoiceData.InvoiceId}").FontSize(20).SemiBold().FontColor(Colors.Blue.Medium);
+
+                        column.Item().Text(text =>
+                        {
+                            text.Span("Date: ");
+                            text.Span(DateOnly.FromDateTime(DateTime.Now).ToString());
+                        });
                     });
 
-                    column.Item().Text(text =>
-                    {
-                        text.Span("Due Date: ").SemiBold();
-                        text.Span("31.03.2026");
-                    });
-
-                    column.Item().Text(text =>
-                    {
-                        text.Span("CHECK").Bold();
-                    });
+                    row.ConstantItem(100).AlignRight().Image("C:\\Users\\manve\\Downloads\\Logo_Project.png");
                 });
 
-                row.ConstantItem(100).AlignRight().Height(70)
-                .Image("C:\\Users\\manve\\Downloads\\Logo_Project.png");
+                col.Item().Row(row =>
+                {
+                    row.RelativeItem().PaddingVertical(6).Column(colx =>
+                    {
+                        colx.Item()
+                        .PaddingTop(4).PaddingBottom(8)
+                        .Background(Colors.LightBlue.Accent3)
+                        .PaddingVertical(4).PaddingLeft(4)
+                        .Text("BILLING INFORMATION");
+
+                        colx.Item().PaddingLeft(4).PaddingTop(4)
+                        .Text(text =>
+                        {
+                            text.Span("Name: ");
+                            text.Span(invoiceData.ClientName);
+                        });
+                        colx.Item().PaddingLeft(4).PaddingTop(8)
+                        .Text(text =>
+                        {
+                            text.Span("Phone: ");
+                            text.Span(invoiceData.ClientPhone);
+                        });
+                        colx.Item().PaddingLeft(4).PaddingTop(8)
+                        .Text(text =>
+                        {
+                            text.Span("Email: ");
+                            text.Span(invoiceData.ClientEmail);
+                        });
+                    });
+                });
             });
         }
 
@@ -64,16 +101,14 @@ namespace ClientManagement.Application.Service
                 column.Spacing(10);
 
                 column.Item().Element(ComposeTable);
-
-                column.Item().AlignRight().Text("Grand Total: 3,999.00$");
-
-                column.Item().Element(ComposeComments);
+                column.Item().Element(ComposeTaxes);
+                //column.Item().Element(ComposeCostInWord);
+                column.Item().Element(ComposeNote);
             });
         }
         void ComposeTable(IContainer container)
         {
             container
-                .Background(Colors.BlueGrey.Lighten1)
                 .Table(table =>
                 {
                     table.ColumnsDefinition(columns =>
@@ -81,58 +116,127 @@ namespace ClientManagement.Application.Service
                         columns.ConstantColumn(25);
                         columns.RelativeColumn(3);
                         columns.RelativeColumn();
-                        columns.RelativeColumn();
-                        columns.RelativeColumn();
                     });
 
                     table.Header(header =>
                     {
-                        header.Cell().Background(Colors.Red.Accent4).Element(CellStyle).Text("#").AlignCenter();
-                        header.Cell().Background(Colors.Blue.Accent4).Element(CellStyle).PaddingLeft(4).Text("Product").AlignLeft();
-                        header.Cell().Background(Colors.Green.Accent4).Element(CellStyle).PaddingRight(4).Text("Unit Price").AlignRight();
-                        header.Cell().Background(Colors.Yellow.Accent4).Element(CellStyle).PaddingRight(4).Text("Quantity").AlignRight();
-                        header.Cell().Background(Colors.DeepOrange.Accent4).Element(CellStyle).PaddingRight(4).Text("Total").AlignRight();
+                        header.Cell().Background(Colors.LightBlue.Accent3)
+                        .Element(CellStyle).Text("#")
+                        .AlignCenter();
+
+                        header.Cell().Background(Colors.LightBlue.Accent3)
+                        .Element(CellStyle).PaddingLeft(4).Text("Project")
+                        .AlignLeft();
+
+                        header.Cell().Background(Colors.LightBlue.Accent3)
+                        .Element(CellStyle).PaddingRight(4).Text("Price")
+                        .AlignCenter();
 
                         static IContainer CellStyle(IContainer container)
                         {
                             return container.DefaultTextStyle(x => x.SemiBold())
-                                .PaddingVertical(5).BorderBottom(1)
-                                .BorderColor(Colors.Black);
+                                .Border(1)
+                                .BorderColor(Colors.LightBlue.Accent4).PaddingVertical(4);
                         }
                     });
 
                     {
-                        table.Cell().Element(CellStyle).Text("1").AlignCenter();
-                        table.Cell().Element(CellStyle).PaddingLeft(4).Text("Product 1").AlignLeft();
-                        table.Cell().Element(CellStyle).PaddingRight(4).Text("$3,999.0").AlignRight();
-                        table.Cell().Element(CellStyle).PaddingRight(4).Text("1").AlignRight();
-                        table.Cell().Element(CellStyle).PaddingRight(4).Text("$3,999.0").AlignRight();
+                        table.Cell().Element(CellStyle)
+                        .Text("1").AlignCenter();
+
+                        table.Cell().Element(CellStyle).PaddingLeft(4)
+                        .Text(invoiceData.ProjectName).AlignLeft();
+
+                        table.Cell().Element(CellStyle).PaddingRight(4)
+                        .Text($"{invoiceData.ProjectCost} ₹").AlignCenter();
 
                         static IContainer CellStyle(IContainer container)
                         {
-                            return container.PaddingVertical(5)
-                                .BorderBottom(1).BorderColor(Colors.Grey.Lighten2);
+                            return container
+                                .BorderLeft(1).BorderRight(1).BorderBottom(1)
+                                .BorderColor(Colors.Grey.Lighten1).PaddingVertical(4);
                         }
                     }
                 });
         }
 
-        void ComposeComments(IContainer container)
+        void ComposeTaxes(IContainer container)
         {
-            container.Background(Colors.Grey.Lighten3).Padding(10).Column(column =>
-            {
-                column.Spacing(6);
-                column.Item().Text("Comments").FontSize(14);
-                column.Item().Text("lashdfpipuahpipvusrufaspu fnisurng iseurng oiserung egr").FontSize(12);
-            });
+            container
+                .AlignMiddle().AlignRight().Column(column =>
+                {
+                    column.Item().MaxWidth(245).Row(row =>
+                    {
+                        row.RelativeItem().PaddingVertical(4).Text("SUB TOTAL");
+                        row.RelativeItem().Border(1).BorderColor(Colors.Grey.Lighten1).PaddingVertical(4)
+                        .Text(invoiceData.ProjectCost.ToString() + " ₹").AlignCenter();
+                    });
+
+                    column.Item().MaxWidth(245).Row(row =>
+                    {
+                        row.RelativeItem().PaddingVertical(4).Text("DISCOUNT");
+                        row.RelativeItem().Border(1).BorderColor(Colors.Grey.Lighten1).PaddingVertical(4).Text("-").AlignCenter();
+                    });
+
+                    column.Item().MaxWidth(245).Row(row =>
+                    {
+                        row.RelativeItem().PaddingVertical(4).Text("TAX");
+                        row.RelativeItem()
+                        .Border(1).BorderColor(Colors.Grey.Lighten1).PaddingVertical(4)
+                        .Text((invoiceData.ProjectCost * 18 / 100).ToString() + " ₹").AlignCenter();
+                    });
+
+                    column.Item().MaxWidth(245).Row(row =>
+                    {
+                        row.RelativeItem().PaddingVertical(4).Text("TOTAL");
+                        row.RelativeItem()
+                        .Border(1).BorderColor(Colors.Grey.Lighten1).PaddingVertical(4)
+                        .Text((invoiceData.ProjectCost + (invoiceData.ProjectCost * 18 / 100)).ToString() + " ₹").AlignCenter();
+                    });
+                });
         }
 
-        void ComposeFooter(IContainer container)
+        void ComposeCostInWord(IContainer container)
         {
-            container.Height(40).AlignMiddle().AlignCenter().Column(column =>
-            {
-                column.Item().Text("Page 1");
-            });
+            var cost = invoiceData.ProjectCost + (invoiceData.ProjectCost * 18 / 100);
+
+            container
+                .AlignMiddle().Padding(10).Column(column =>
+                {
+                    column.Item().Text(GetWords(cost)).FontSize(14).ExtraBold().FontColor(Colors.Red.Medium).AlignCenter();
+                });
         }
+
+        string GetWords(double cost)
+        {
+            int tempCost = (int)cost;
+
+            int count = 0;
+
+            while(tempCost > 0)
+            {
+                int digit = tempCost % 10;
+
+            }
+            return "One Thousand Two Hundred Eighty Rupees Only";
+        }
+
+        void ComposeNote(IContainer container)
+        {
+            container
+                .Background(Colors.Grey.Lighten3)
+                .AlignMiddle().Padding(10).Column(column =>
+                {
+                    column.Item()
+                    .Text("* THIS IS A TEST INVOICE, DO NOT USE IT FOR ANY PURPOSE *")
+                    .FontSize(12).Bold().FontColor(Colors.Red.Darken2).AlignCenter();
+                });
+        }
+
+        void ComposeFooter(IContainer container) => 
+            container.Height(40).AlignBottom().AlignCenter().Column(column =>
+            {
+                column.Item().Text("Page 1").Underline();
+            });
     }
 }
