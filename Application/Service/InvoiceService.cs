@@ -9,9 +9,7 @@ namespace ClientManagement.Application.Service
     public class InvoiceService : IInvoiceService
     {
         private CreateInvoiceDTO invoiceData = new CreateInvoiceDTO();
-        private readonly List<string> tensDigit = [ "Ten", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety" ];
-        private readonly List<string> teensDigit = ["Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
-        private readonly List<string> onceDigit = ["One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"];
+
         public async Task<byte[]> CreateInvoice(CreateInvoiceDTO invoiceData)
         {
             this.invoiceData = invoiceData;
@@ -47,9 +45,7 @@ namespace ClientManagement.Application.Service
                     row.RelativeItem().Column(column =>
                     {
                         column.Item().Text("DEVIL HUNTER TECH").FontSize(20).FontFamily("GENISO");
-
                         column.Item().Text("200X, Near Anor Londo Church,\nRed Grave City\n").FontSize(12);
-
                         column.Item().Text($"Invoice #{invoiceData.InvoiceId}").FontSize(20).SemiBold().FontColor(Colors.Blue.Medium);
 
                         column.Item().Text(text =>

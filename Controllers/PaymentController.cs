@@ -36,7 +36,6 @@ namespace ClientManagement.Controllers
 
             work.IsPaid = true;
             await dbContext.SaveChangesAsync();
-
             await _queue.EnqueueAsync(workId);
 
             return Ok("payment successful simulation");
@@ -52,9 +51,6 @@ namespace ClientManagement.Controllers
 
             if (work.IsPaid)
                 return Ok("Already paid");
-
-            work.IsPaid = true;
-            await dbContext.SaveChangesAsync();
 
             return Ok("payment failed simulation");
         }

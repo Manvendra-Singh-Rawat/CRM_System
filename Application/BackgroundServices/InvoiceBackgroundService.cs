@@ -20,10 +20,8 @@ namespace ClientManagement.Application.BackgroundServices
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            
             while (!stoppingToken.IsCancellationRequested)
             {
-                Console.WriteLine("Inside InvoiceBackgroundService");
                 var workId = await _bgQueue.DequeueAsync(stoppingToken);
 
                 using var scope = _scopeFactory.CreateScope();

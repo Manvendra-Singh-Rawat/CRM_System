@@ -4,6 +4,7 @@ using ClientManagement.Application.Interfaces;
 using ClientManagement.Application.Service;
 using ClientManagement.Infrastructure.Persistence.PostgresDB;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using QuestPDF.Infrastructure;
@@ -13,18 +14,14 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddHttpContextAccessor();
-
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
 builder.Services.Configure<SMTPSettings>(builder.Configuration.GetSection("SMTP"));
 
 QuestPDF.Settings.License = LicenseType.Community;
 builder.Services.AddScoped<IInvoiceService, InvoiceService>();
-builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddSingleton<IGenerateInvoiceTaskQueue, GenerateInvoiceTaskQueue>();
 builder.Services.AddSingleton<ISendEmailTaskQueue, SendEmailTaskQueue>();
@@ -64,11 +61,12 @@ builder.Services.AddAuthorization();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-    app.MapScalarApiReference();
-}
+if (!app.Environment.IsDevelopment())
+    app.UseForwardedHeaders(new ForwardedHeadersOptions{ ForwardedHeaders = ForwardedHeaders.XForwardedProto });
+
+app.MapOpenApi();
+app.MapScalarApiReference();
+app.UseHttpsRedirection();
 
 app.UseHttpsRedirection();
 app.UseAuthorization();

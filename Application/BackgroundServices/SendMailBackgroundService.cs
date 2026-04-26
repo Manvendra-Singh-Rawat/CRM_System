@@ -1,12 +1,9 @@
 ﻿using ClientManagement.Application.DTO;
 using ClientManagement.Application.Environment;
 using ClientManagement.Application.Interfaces;
-using ClientManagement.Infrastructure.Persistence.PostgresDB;
-using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.Extensions.Options;
 using MimeKit;
-//using System.Net.Mail;
 
 namespace ClientManagement.Application.BackgroundServices
 {
@@ -27,20 +24,17 @@ namespace ClientManagement.Application.BackgroundServices
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                Console.WriteLine("Inside SendMailBackgroundService");
                 InvoiceDataDTO invoiceData = await _emailQueue.DequeueAsync(stoppingToken);
-
-                string mailSubject = $"INVOICE: {invoiceData.ProjectName}";
 
                 try
                 {
+                    string mailSubject = $"INVOICE: {invoiceData.ProjectName}";
                     var memStream = new MemoryStream(invoiceData.InvoiceBytes);
-
                     var bodyBuilder = new BodyBuilder
-                    {
-                        TextBody = $"Your payment for {invoiceData.ProjectName} has been successfully completed"
-                    };
-                    bodyBuilder.Attachments.Add($"Invoice_{invoiceData.ProjectName}.pdf", invoiceData.InvoiceBytes, new ContentType("application", "pdf"));
+                    { TextBody = $"Your payment for {invoiceData.ProjectName} has been successfully completed" };
+                    bodyBuilder.Attachments.Add($"Invoice_{invoiceData.ProjectName}.pdf",
+                        invoiceData.InvoiceBytes, 
+                        new ContentType("application", "pdf"));
 
                     await SendMails(mailSubject, bodyBuilder, invoiceData.Email);
                 }
@@ -64,11 +58,7 @@ namespace ClientManagement.Application.BackgroundServices
             email.Body = bodyBuilder.ToMessageBody();
 
             await smtp.SendAsync(email);
-            Console.WriteLine($"Sent to: 'TEST USER' \nAt Mail: {receiverMail}\n");
-
             await smtp.DisconnectAsync(true);
-            Console.WriteLine("Disconnected from SMTP Server");
-
             return;
         }
     }
