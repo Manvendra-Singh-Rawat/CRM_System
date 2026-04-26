@@ -8,18 +8,22 @@ namespace ClientManagement.Application.BackgroundServices
     public class InvoiceBackgroundService : BackgroundService
     {
         private readonly IServiceScopeFactory _scopeFactory;
-        private readonly IBackgroundTaskQueue _bgQueue;
+        private readonly IGenerateInvoiceTaskQueue _bgQueue;
+        private readonly ISendEmailTaskQueue _emailQueue;
 
-        public InvoiceBackgroundService(IServiceScopeFactory scopeFactory, IBackgroundTaskQueue bgQueue)
+        public InvoiceBackgroundService(IServiceScopeFactory scopeFactory, IGenerateInvoiceTaskQueue bgQueue, ISendEmailTaskQueue _emailQueue)
         {
             _scopeFactory = scopeFactory;
             _bgQueue = bgQueue;
+            this._emailQueue = _emailQueue;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            
             while (!stoppingToken.IsCancellationRequested)
             {
+                Console.WriteLine("Inside InvoiceBackgroundService");
                 var workId = await _bgQueue.DequeueAsync(stoppingToken);
 
                 using var scope = _scopeFactory.CreateScope();
@@ -34,7 +38,7 @@ namespace ClientManagement.Application.BackgroundServices
                     {
                         InvoiceId = w.Id,
                         ClientId = w.ClientId,
-                        WorkId = 8,
+                        WorkId = w.Id,
                         ClientName = w.User.UserDetail.Name,
                         ClientPhone = w.User.UserDetail.Phone,
                         ClientEmail = w.User.Email,
@@ -43,7 +47,13 @@ namespace ClientManagement.Application.BackgroundServices
                     })
                     .FirstOrDefaultAsync(stoppingToken);
 
-                    await invoiceServices.CreateInvoice(workData);
+                    byte[] invoiceBytes = await invoiceServices.CreateInvoice(workData);
+                    await _emailQueue.EnqueueAsync(new InvoiceDataDTO
+                    {
+                        InvoiceBytes = invoiceBytes,
+                        ProjectName = workData.ProjectName,
+                        Email = workData.ClientEmail
+                    });
                 }
                 catch (Exception ex)
                 {

@@ -12,11 +12,11 @@ namespace ClientManagement.Application.Service
         private readonly List<string> tensDigit = [ "Ten", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety" ];
         private readonly List<string> teensDigit = ["Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
         private readonly List<string> onceDigit = ["One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"];
-        public Task CreateInvoice(CreateInvoiceDTO invoiceData)
+        public async Task<byte[]> CreateInvoice(CreateInvoiceDTO invoiceData)
         {
             this.invoiceData = invoiceData;
 
-            Document.Create(container =>
+            byte[] invoiceBytes = Document.Create(container =>
             {
                 container.Page(page =>
                 {
@@ -32,8 +32,9 @@ namespace ClientManagement.Application.Service
                     page.Footer().Height(40)
                     .Element(ComposeFooter);
                 });
-            }).GeneratePdf("test path");
-            return Task.CompletedTask;
+            }).GeneratePdf();
+
+            return invoiceBytes;
         }
 
         // HEADER

@@ -3,7 +3,7 @@ using System.Threading.Channels;
 
 namespace ClientManagement.Application.BackgroundServices
 {
-    public class BackgroundTaskQueue : IBackgroundTaskQueue
+    public class GenerateInvoiceTaskQueue : IGenerateInvoiceTaskQueue
     {
         private readonly Channel<int> _queue = Channel.CreateUnbounded<int>();
 

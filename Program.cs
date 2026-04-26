@@ -1,4 +1,5 @@
 using ClientManagement.Application.BackgroundServices;
+using ClientManagement.Application.Environment;
 using ClientManagement.Application.Interfaces;
 using ClientManagement.Application.Service;
 using ClientManagement.Infrastructure.Persistence.PostgresDB;
@@ -19,12 +20,16 @@ builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
+builder.Services.Configure<SMTPSettings>(builder.Configuration.GetSection("SMTP"));
+
 QuestPDF.Settings.License = LicenseType.Community;
 builder.Services.AddScoped<IInvoiceService, InvoiceService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
-builder.Services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
+builder.Services.AddSingleton<IGenerateInvoiceTaskQueue, GenerateInvoiceTaskQueue>();
+builder.Services.AddSingleton<ISendEmailTaskQueue, SendEmailTaskQueue>();
 builder.Services.AddHostedService<InvoiceBackgroundService>();
+builder.Services.AddHostedService<SendMailBackgroundService>();
 
 builder.Services.AddMediatR(config =>
 {

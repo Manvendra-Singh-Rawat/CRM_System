@@ -4,6 +4,6 @@ namespace ClientManagement.Application.Interfaces
 {
     public interface IInvoiceService
     {
-        Task CreateInvoice(CreateInvoiceDTO invoiceData);
+        Task<byte[]> CreateInvoice(CreateInvoiceDTO invoiceData);
     }
 }

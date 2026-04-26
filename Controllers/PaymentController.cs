@@ -10,7 +10,7 @@ namespace ClientManagement.Controllers
 {
     [ApiController]
     [Route("[Controller]Payment")]
-    public class PaymentController(ClientManagementDbContext dbContext, ISender sender, IBackgroundTaskQueue _queue) : Controller
+    public class PaymentController(ClientManagementDbContext dbContext, ISender sender, IGenerateInvoiceTaskQueue _queue) : Controller
     {
         [Authorize]
         [HttpPost("create-payment-link")]
@@ -38,6 +38,7 @@ namespace ClientManagement.Controllers
             await dbContext.SaveChangesAsync();
 
             await _queue.EnqueueAsync(workId);
+
             return Ok("payment successful simulation");
         }
 
