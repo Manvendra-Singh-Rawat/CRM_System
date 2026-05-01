@@ -22,7 +22,10 @@ namespace ClientManagement.Application.Features.Command
             if (userDetails == null)
                 return Result<string>.Failure("Internal Server Error", 500);
 
-            userDetails.Name = userDetails.Name ?? request.Name;
+            if(userDetails.Name == "")
+            {
+                userDetails.Name = request.Name;
+            }
             userDetails.Phone = request.Phone ?? userDetails.Phone;
             userDetails.Company = request.Company ?? userDetails.Company;
 
