@@ -55,7 +55,13 @@ namespace ClientManagement.Application.Service
                         });
                     });
 
-                    row.ConstantItem(100).AlignRight().Image("..\\CRM_System\\CompanyLogo\\Logo_Project.png");
+                    var imagePath = Path.Combine(
+                        AppDomain.CurrentDomain.BaseDirectory,
+                        "CompanyLogo",
+                        "Logo_Project.png"
+                    );
+
+                    row.ConstantItem(100).AlignRight().Image(imagePath);
                 });
 
                 col.Item().Row(row =>

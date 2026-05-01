@@ -32,4 +32,10 @@
     <Folder Include="Infrastructure\Repository\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="CompanyLogo\Logo_Project.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
